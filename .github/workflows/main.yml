@@ -25,19 +25,18 @@ jobs:
           distribution:  zulu 
           java-version:  17 
 
-      - name: Install dependencies & Prebuild
+      - name: Install Dependencies & Prebuild
         run: |
           cd extracted_app/messenger-app/mobile
           npm install
+          npm install -g react-native-cli
           npx expo prebuild --platform android --clean
 
-      - name: Build Gradle Release APK
+      - name: Fix CLI Path & Build APK
         run: |
           cd extracted_app/messenger-app/mobile/android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
-        env:
-          NODE_BINARY: node
+          ./gradlew assembleRelease -PreactNativeCliPath="../../node_modules/react-native/cli.js" --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
