@@ -22,10 +22,11 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      - name: Build APK on Expo Cloud
+      - name: Init EAS & Build APK
         run: |
           cd extracted_app/messenger-app/mobile
           npm install
+          eas init --non-interactive --force || true
           eas build -p android --profile preview --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
