@@ -25,22 +25,21 @@ jobs:
           distribution:  zulu 
           java-version:  17 
 
-      - name: Install dependencies & Build APK
+      - name: Install dependencies & Prebuild
         run: |
           cd extracted_app/messenger-app/mobile
           npm install
-          if [ -d "android" ]; then
-            cd android
-            chmod +x gradlew
-            ./gradlew assembleRelease
-          else
-            npx expo run:android --variant release || true
-          fi
+          npx expo prebuild --platform android
+
+      - name: Build APK
+        run: |
+          cd extracted_app/messenger-app/mobile/android
+          chmod +x gradlew
+          ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: |
-            extracted_app/messenger-app/mobile/android/app/build/outputs/apk/release/*.apk
+          path: extracted_app/messenger-app/mobile/android/app/build/outputs/apk/release/*.apk
 
