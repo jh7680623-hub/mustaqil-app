@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK via Expo
 
 on:
   workflow_dispatch:
@@ -10,37 +10,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Unzip project
-        run: |
-          unzip mustaqil-project-export.zip -d extracted_app
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution:  zulu 
-          java-version:  17 
+      - name: Unzip project
+        run: |
+          unzip mustaqil-project-export.zip -d extracted_app
 
-      - name: Install Dependencies & Prebuild
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Build APK on Expo Cloud
         run: |
           cd extracted_app/messenger-app/mobile
-          npm install
-          npm install -g react-native-cli
-          npx expo prebuild --platform android --clean
-
-      - name: Fix CLI Path & Build APK
-        run: |
-          cd extracted_app/messenger-app/mobile/android
-          chmod +x gradlew
-          ./gradlew assembleRelease -PreactNativeCliPath="../../node_modules/react-native/cli.js" --no-daemon
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-apk
-          path: extracted_app/messenger-app/mobile/android/app/build/outputs/apk/release/*.apk
+          eas build -p android --profile preview --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
