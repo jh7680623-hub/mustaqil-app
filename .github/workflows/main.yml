@@ -1,0 +1,22 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Unzip project
+        run: |
+          unzip mustaqil-project-export.zip -d extracted_app
+
+      - name: Upload Extracted Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: extracted-project
+          path: extracted_app/
+
