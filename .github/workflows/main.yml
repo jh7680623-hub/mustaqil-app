@@ -25,6 +25,7 @@ jobs:
       - name: Build APK on Expo Cloud
         run: |
           cd extracted_app/messenger-app/mobile
+          npm install
           eas build -p android --profile preview --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
