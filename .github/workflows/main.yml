@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Android APK
 
 on:
   workflow_dispatch:
@@ -14,9 +14,33 @@ jobs:
         run: |
           unzip mustaqil-project-export.zip -d extracted_app
 
-      - name: Upload Extracted Files
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution:  zulu 
+          java-version:  17 
+
+      - name: Install dependencies & Build APK
+        run: |
+          cd extracted_app/messenger-app/mobile
+          npm install
+          if [ -d "android" ]; then
+            cd android
+            chmod +x gradlew
+            ./gradlew assembleRelease
+          else
+            npx expo run:android --variant release || true
+          fi
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: extracted-project
-          path: extracted_app/
+          name: app-release-apk
+          path: |
+            extracted_app/messenger-app/mobile/android/app/build/outputs/apk/release/*.apk
 
