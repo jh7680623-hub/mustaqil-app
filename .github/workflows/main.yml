@@ -22,14 +22,31 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      - name: Setup Credentials & Build APK
+      - name: Configure and Build APK
         run: |
           cd extracted_app/messenger-app/mobile
           npm install
           eas init --non-interactive --force || true
-          eas build:configure -p android
-          eas credentials -p android --auto-create-keystore --non-interactive || true
-          eas build -p android --profile preview --non-interactive
+          
+          # Create eas.json dynamically
+          cat <<EOF > eas.json
+          {
+            "cli": {
+              "version": ">= 3.0.0"
+            },
+            "build": {
+              "preview": {
+                "android": {
+                  "buildType": "apk"
+                }
+              }
+            }
+          }
+          EOF
+
+          # Build on Expo Cloud with automatic credentials
+          eas build -p android --profile preview --non-interactive --no-wait
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EAS_NO_VCS:  1 
+
