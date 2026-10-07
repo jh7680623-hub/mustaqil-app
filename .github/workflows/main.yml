@@ -22,13 +22,14 @@ jobs:
       - name: Install EAS CLI
         run: npm install -g eas-cli
 
-      - name: Credentials & Build APK
+      - name: Setup Credentials & Build APK
         run: |
           cd extracted_app/messenger-app/mobile
           npm install
           eas init --non-interactive --force || true
+          eas build:configure -p android
+          eas credentials -p android --auto-create-keystore --non-interactive || true
           eas build -p android --profile preview --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           EAS_NO_VCS:  1 
-
