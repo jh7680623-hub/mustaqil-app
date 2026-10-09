@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Mustaqil Android APK Build
 
 on:
   workflow_dispatch:
@@ -6,26 +6,37 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Extract Project ZIP
+      - name: Extract New Manus Project ZIP
         run: |
-          unzip -o mustaqil-eas-cloud-project.zip -d extracted_project
-          cp -r extracted_project/messenger-app/mobile/* .
+          unzip -o mustaqil-final-eas-apk-project.zip -d extracted_project
+          test -f extracted_project/messenger-app/mobile/package.json
+          test -f extracted_project/messenger-app/mobile/app.json
+          test -f extracted_project/messenger-app/mobile/eas.json
 
       - name: Setup EAS CLI
         run: npm install -g eas-cli
 
-      - name: Build Android APK via EAS
+      - name: Install Dependencies
+        working-directory: extracted_project/messenger-app/mobile
+        run: npm ci
+
+      - name: Verify Expo Configuration
+        working-directory: extracted_project/messenger-app/mobile
+        run: npx expo config --json
+
+      - name: Build Android APK
+        working-directory: extracted_project/messenger-app/mobile
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: |
-          eas build --platform android --profile preview --non-interactive
-
+        run: eas build --platform android --profile preview --non-interactive
+        
