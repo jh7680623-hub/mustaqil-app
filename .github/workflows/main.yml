@@ -1,4 +1,4 @@
-name: Build Android APK via Expo
+name: Build Android APK
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
       - name: Setup Node.js
@@ -15,38 +15,17 @@ jobs:
         with:
           node-version: 18
 
-      - name: Unzip project
+      - name: Extract Project ZIP
         run: |
-          unzip mustaqil-project-export.zip -d extracted_app
+          unzip -o mustaqil-eas-cloud-project.zip -d extracted_project
+          cp -r extracted_project/messenger-app/mobile/* .
 
-      - name: Install EAS CLI
+      - name: Setup EAS CLI
         run: npm install -g eas-cli
 
-      - name: Configure and Build APK
-        run: |
-          cd extracted_app/messenger-app/mobile
-          npm install
-          eas init --non-interactive --force || true
-          
-          # Create eas.json dynamically
-          cat <<EOF > eas.json
-          {
-            "cli": {
-              "version": ">= 3.0.0"
-            },
-            "build": {
-              "preview": {
-                "android": {
-                  "buildType": "apk"
-                }
-              }
-            }
-          }
-          EOF
-
-          # Build on Expo Cloud with automatic credentials
-          eas build -p android --profile preview --non-interactive --no-wait
+      - name: Build Android APK via EAS
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EAS_NO_VCS:  1 
+        run: |
+          eas build --platform android --profile preview --non-interactive
 
